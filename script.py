@@ -7,41 +7,42 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 
+
 def get_vault_cred():
     try:
-        client = hvac.Client(
-            url="http://localhost:8200",
-            token="root-token"
-        )
+        client = hvac.Client(url="http://localhost:8200", token="root-token")
         if not client.is_authenticated():
             raise Exception("Vault authentication failed")
-        
+
         secret = client.secrets.kv.v2.read_secret_version(
-            path="screener",
-            mount_point="secret"
+            path="screener", mount_point="secret"
         )
 
         username = secret["data"]["data"]["username"]
         password = secret["data"]["data"]["password"]
 
         return username, password
-    
+
     except Exception as e:
         print(f"Error fetching vault credentials: {e}")
         raise
 
+
 def download_reliance_data(username, password):
     try:
-        download_dir = r'C:\Users\Harsh.karira\Desktop\vault'
+        download_dir = r"C:\Users\Harsh.karira\Desktop\vault"
         chrome_options = Options()
-        chrome_options.add_experimental_option('prefs', {
-            'download.default_directory': download_dir,
-            'download.prompt_for_download': False,
-            'download.directory_upgrade': True,
-        })
+        chrome_options.add_experimental_option(
+            "prefs",
+            {
+                "download.default_directory": download_dir,
+                "download.prompt_for_download": False,
+                "download.directory_upgrade": True,
+            },
+        )
         # chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
 
         driver = webdriver.Chrome(options=chrome_options)
         print("Browser opened successfully")
@@ -67,7 +68,9 @@ def download_reliance_data(username, password):
 
         driver.get("https://www.screener.in/company/RELIANCE/")
         export_button = WebDriverWait(driver, 20).until(
-            EC.element_to_be_clickable((By.XPATH, '//button[@aria-label="Export to Excel"]'))
+            EC.element_to_be_clickable(
+                (By.XPATH, '//button[@aria-label="Export to Excel"]')
+            )
         )
         export_button.click()
         print("Export button clicked")
@@ -85,6 +88,7 @@ def download_reliance_data(username, password):
     finally:
         driver.quit()
 
+
 def main():
     try:
         username, password = get_vault_cred()
@@ -93,6 +97,7 @@ def main():
     except Exception as e:
         print(f"Script failed: {e}")
         raise
+
 
 if __name__ == "__main__":
     main()
